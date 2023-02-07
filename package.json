@@ -4,14 +4,16 @@
     "license": "UNLICENSED",
     "type": "module",
     "scripts": {
-      "test": "npx playwright test"
+        "test": "npx playwright test"
     },
     "dependencies": {
         "apify": "^3.0.0",
         "crawlee": "^3.0.0",
         "playwright": "*",
-        "typescript": "^4.7.4",
-        "@playwright/test": "^1.30.0"
+        "typescript": "^4.7.4"
     },
-    "repository": {}
+    "repository": {},
+    "devDependencies": {
+        "@playwright/test": "^1.30.0"
+    }
 }
