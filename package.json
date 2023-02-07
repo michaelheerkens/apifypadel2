@@ -5,7 +5,7 @@
     "main": "main.js",
     "type": "module",
     "scripts": {
-        "start": "node main.js"
+      "test": "npx playwright test"
     },
     "dependencies": {
         "apify": "^3.0.0",
