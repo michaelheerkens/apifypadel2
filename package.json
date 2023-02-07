@@ -7,9 +7,9 @@
         "start": "node main.js"
     },
     "dependencies": {
-        "apify": "APIFY_VERSION",
-        "crawlee": "CRAWLEE_VERSION",
-        "playwright": "PLAYWRIGHT_VERSION",
+        "apify": "^3.0.0",
+        "crawlee": "^3.0.0",
+        "playwright": "*",
         "typescript": "^4.7.4"
     },
     "repository": {}
