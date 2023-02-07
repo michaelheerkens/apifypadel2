@@ -28,9 +28,9 @@ const crawler = new PlaywrightCrawler({
         console.log(`Processing ${request.url}...`);
 
         await page.locator('input[name="username"]').click();
-        await page.locator('input[name="username"]').fill('Michael84');
+        await page.locator('input[name="username"]').fill(process.env.PADEL_USERNAME);
         await page.locator('input[name="password"]').click();
-        await page.locator('input[name="password"]').fill('&nFjY61t&NBgu4');
+        await page.locator('input[name="password"]').fill(process.env.PADEL_PWD);
         await page.getByRole('button', { name: 'Inloggen' }).click();
 
         const findTime = '21:00';
