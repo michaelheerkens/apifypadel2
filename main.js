@@ -1,44 +1,67 @@
-// This file will be replaced by the content of the Act2.sourceCode field,
-// we keep this one here just for testing and clarification.
+import { Actor } from 'apify';
+import { PlaywrightCrawler } from 'crawlee';
 
-console.log(
-    `If you're seeing this text, it means the actor started the default "main.js" file instead
-of your own source code file. You have two options how to fix this:
-1) Rename your source code file to "main.js"
-2) Define custom "package.json" and/or "Dockerfile" that will run your code your way
+await Actor.init();
 
-For more information, see https://docs.apify.com/actors/development/source-code#custom-dockerfile
-`);
-console.log('Testing Docker image...');
+// Create an instance of the PlaywrightCrawler class - a crawler
+// that automatically loads the URLs in headless Chrome / Playwright.
+const crawler = new PlaywrightCrawler({
+    launchContext: {
+        // Here you can set options that are passed to the playwright .launch() function.
+        launchOptions: {
+            headless: true,
+        },
+    },
 
-const { Actor } = require('apify');
-const { launchPlaywright, getMemoryInfo } = require('crawlee');
-const playwright = require('playwright');
-const { testChrome, testPageLoading } = require('./chrome_test');
+    // Stop crawling after several pages
+    maxRequestsPerCrawl: 50,
 
-Actor.main(async () => {
-    const browsers = ['webkit', 'firefox', 'chromium'];
-    const promisesHeadless = browsers.map(async (browserName) => {
-        const browser = await launchPlaywright({ launcher: playwright[browserName] });
-        return testPageLoading(browser);
-    });
+    // This function will be called for each URL to crawl.
+    // Here you can write the Playwright scripts you are familiar with,
+    // with the exception that browsers and pages are automatically managed by the Apify SDK.
+    // The function accepts a single parameter, which is an object with a lot of properties,
+    // the most important being:
+    // - request: an instance of the Request class with information such as URL and HTTP method
+    // - page: Playwright's Page object (see https://playwright.dev/docs/api/class-page)
+    async requestHandler({ request, page, enqueueLinks }) {
+        console.log(`Processing ${request.url}...`);
 
-    const promisesHeadful = browsers.map(async (browserName) => {
-        const browser = await launchPlaywright({ launcher: playwright[browserName], launchOptions: { headless: false } });
-        return testPageLoading(browser);
-    });
+        // A function to be evaluated by Playwright within the browser context.
+        const data = await page.$$eval('.athing', ($posts) => {
+            const scrapedData = [];
 
-    await Promise.all(promisesHeadless);
-    await Promise.all(promisesHeadful);
+            // We're getting the title, rank and URL of each post on Hacker News.
+            $posts.forEach(($post) => {
+                scrapedData.push({
+                    title: $post.querySelector('.title a').innerText,
+                    rank: $post.querySelector('.rank').innerText,
+                    href: $post.querySelector('.title a').href,
+                });
+            });
 
-    // Try to use full Chrome headless
-    await testChrome({ headless: true });
+            return scrapedData;
+        });
 
-    // Try to use full Chrome with XVFB
-    await testChrome({ headless: false, args: ['--disable-gpu'] });
+        // Store the results to the default dataset.
+        await Actor.pushData(data);
 
-    // Test that "ps" command is available, sometimes it was missing in official Node builds
-    await getMemoryInfo();
+        // Find a link to the next page and enqueue it if it exists.
+        const infos = await enqueueLinks({
+            selector: '.morelink',
+        });
 
-    console.log('All tests passed!');
+        if (infos.processedRequests.length === 0) console.log(`${request.url} is the last page!`);
+    },
+
+    // This function is called if the page processing failed more than maxRequestRetries+1 times.
+    failedRequestHandler({ request }) {
+        console.log(`Request ${request.url} failed too many times.`);
+    },
 });
+
+// Run the crawler and wait for it to finish.
+await crawler.run(['https://news.ycombinator.com/']);
+
+console.log('Crawler finished.');
+
+await Actor.exit();
