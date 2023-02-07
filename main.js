@@ -27,7 +27,6 @@ const crawler = new PlaywrightCrawler({
     async requestHandler({ request, page, enqueueLinks }) {
         console.log(`Processing ${request.url}...`);
 
-        await page.goto(${request.url});
         await page.locator('input[name="username"]').click();
         await page.locator('input[name="username"]').fill('Michael84');
         await page.locator('input[name="password"]').click();
