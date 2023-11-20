@@ -33,8 +33,8 @@ const crawler = new PlaywrightCrawler({
         await page.locator('input[name="password"]').fill(process.env.PADEL_PWD);
         await page.getByRole('button', { name: 'Inloggen' }).click();
 
-        const findTime = '21:00';
-        const findDate = '2023-2-8';
+        const findTime = '20:30';
+        const findDate = '2023-11-29';
 
         await page.goto('https://mypadelclubkrimpen.baanreserveren.nl/reservations/' + findDate + '/sport/1251');
 
